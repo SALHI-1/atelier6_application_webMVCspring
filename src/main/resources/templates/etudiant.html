@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Liste des étudiants</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+
+<h1 class="text-2xl font-bold mb-4">Liste des étudiants</h1>
+
+<!-- Bouton pour ouvrir le modal -->
+<button id="openModal" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+    Ajouter un étudiant
+</button>
+
+<!-- Tableau des étudiants (exemple statique) -->
+
+
+<table class="min-w-full bg-white mt-4 rounded shadow">
+    <thead>
+    <tr>
+        <th class="py-2 px-4 border-b text-center">Nom</th>
+        <th class="py-2 px-4 border-b text-center">Prénom</th>
+        <th class="py-2 px-4 border-b text-center">Absences</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="etudiant : ${etudiants}">
+        <td class="py-2 px-4 border-b text-center" th:text="${etudiant.nom}">Nom</td>
+        <td class="py-2 px-4 border-b text-center" th:text="${etudiant.prenom}">Prénom</td>
+        <td class="py-2 px-4 border-b text-center">
+            <a th:href="@{/absences/{id}(id=${etudiant.id})}"
+               class="text-blue-500 hover:underline">
+                Voir absences
+            </a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+
+<!-- Modal -->
+<div id="addEtudiantModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg w-96 p-6 relative">
+        <button id="closeModal" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700">&times;</button>
+        <h2 class="text-xl font-bold mb-4">Ajouter un étudiant</h2>
+        <form id="addEtudiantForm" class="space-y-4">
+            <div>
+                <label for="nom" class="block text-gray-700">Nom</label>
+                <input type="text" id="nom" name="nom" class="w-full border border-gray-300 rounded px-3 py-2" required>
+            </div>
+            <div>
+                <label for="prenom" class="block text-gray-700">Prénom</label>
+                <input type="text" id="prenom" name="prenom" class="w-full border border-gray-300 rounded px-3 py-2" required>
+            </div>
+            <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Ajouter</button>
+        </form>
+    </div>
+</div>
+
+
+<script>
+    const modal = document.getElementById('addEtudiantModal');
+    const openModalBtn = document.getElementById('openModal');
+    const closeModalBtn = document.getElementById('closeModal');
+
+    openModalBtn.addEventListener('click', () => modal.classList.remove('hidden'));
+    closeModalBtn.addEventListener('click', () => modal.classList.add('hidden'));
+    window.addEventListener('click', (e) => { if(e.target === modal) modal.classList.add('hidden'); });
+
+    // Formulaire AJAX
+    document.getElementById("addEtudiantForm").addEventListener("submit", function(e){
+        e.preventDefault();
+        const formData = new FormData(this);
+        const data = new URLSearchParams(formData);
+
+        fetch('/etudiants/add', {
+            method: 'POST',
+            body: data
+        })
+            .then(response => response.text())
+            .then(result => {
+                if(result === "success") {
+                    alert("Étudiant ajouté !");
+                    location.reload(); // recharge la page pour afficher le nouvel étudiant
+                }
+            })
+            .catch(error => console.error('Erreur:', error));
+    });
+</script>
+
+</body>
+</html>

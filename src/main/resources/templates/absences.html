@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Liste des absences</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+
+<h1 class="text-2xl font-bold mb-4">Liste des absences</h1>
+
+<div class="flex justify-center space-x-6 bg-white p-4 rounded shadow w-fit mx-auto text-lg font-medium">
+    <p>Nom : <span class="text-gray-700" th:text="${absences[0].etudiant.nom}"></span></p>
+    <p>Prénom : <span class="text-gray-700" th:text="${absences[0].etudiant.prenom}"></span></p>
+</div>
+
+
+
+<table class="min-w-full bg-white mt-4 rounded shadow">
+    <thead>
+    <tr>
+        <th class="py-2 px-4 border-b text-center">Date d'absence</th>
+        <th class="py-2 px-4 border-b text-center">Justifiée</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="absence : ${absences}">
+        <td class="py-2 px-4 border-b text-center" th:text="${absence.dateAbsence}">Date</td>
+        <td class="py-2 px-4 border-b text-center" th:text="${absence.justificated} ? 'Oui' : 'Non'">Oui/Non</td>
+    </tr>
+    </tbody>
+</table>
+<button id="openModal" class="bg-green-500 text-white px-4 py-2 rounded">Ajouter une absence</button>
+
+<div id="addModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg w-96 p-6 relative">
+        <button id="closeModal" class="absolute top-2 right-2 text-gray-500">&times;</button>
+        <h2 class="text-xl font-bold mb-4">Ajouter une absence</h2>
+        <form id="addAbsenceForm" class="space-y-4">
+            <input type="date" name="dateAbsence" class="w-full border px-3 py-2 rounded" required>
+            <label class="flex items-center space-x-2">
+                <input type="checkbox" name="justificated">
+                <span>Justifiée</span>
+            </label>
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Ajouter</button>
+        </form>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    const modal = document.getElementById('addModal');
+    document.getElementById('openModal').addEventListener('click', () => modal.classList.remove('hidden'));
+    document.getElementById('closeModal').addEventListener('click', () => modal.classList.add('hidden'));
+    let etudiantId = /*[[${etudiantId}]]*/ 0;
+    // Formulaire AJAX
+    document.getElementById('addAbsenceForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        fetch(`/absences/add/${etudiantId}`, {method: 'POST', body: new URLSearchParams(formData)})
+            .then(
+                                res => location.reload()
+            )
+            .catch(err => console.error(err));
+    });
+</script>
+
+</body>
+</html>
